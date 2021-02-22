@@ -1,7 +1,7 @@
 'use strict'
 
 var bail = require('./src/utils/bail')
-var buffer = require('is-buffer')
+var buffer = require('./src/utils/is-buffer')
 var extend = require('extend')
 var plain = require('is-plain-obj')
 var trough = require('trough')
