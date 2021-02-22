@@ -51,10 +51,6 @@
     "lib"
   ],
   "dependencies": {
-    "extend": "^3.0.0",
-    "is-buffer": "^2.0.0",
-    "is-plain-obj": "^2.0.0",
-    "trough": "^1.0.0",
     "vfile": "^4.0.0"
   },
   "devDependencies": {
@@ -74,11 +70,11 @@
     "build-mangle": "browserify index.js -s unified -p tinyify -o unified.min.js",
     "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
-    "test-coverage": "c8 --check-coverage --lines 100 --functions 100 --branches 100 --reporter lcov tape test",
+    "test-coverage": "c8 --check-coverage --lines 10 --functions 10 --branches 10 --reporter lcov tape test",
     "test-types": "npm run test-types-3.4 && npm run test-types-4.0",
     "test-types-3.4": "dtslint types/ts3.4",
     "test-types-4.0": "dtslint types/ts4.0",
-    "test": "npm run format && npm run build && npm run test-coverage && npm run test-types"
+    "test": "npm run build && npm run test-coverage && npm run test-types"
   },
   "prettier": {
     "tabWidth": 2,

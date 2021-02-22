@@ -1,10 +1,10 @@
 'use strict'
 
 var bail = require('./src/utils/bail')
-var buffer = require('./src/utils/is-buffer')
-var extend = require('extend')
-var plain = require('is-plain-obj')
-var trough = require('trough')
+var buffer = require('./src/utils/isBuffer')
+var extend = require('./src/utils/extend')
+var isPlainObject = require('./src/utils/isPlainObject')
+var trough = require('./src/utils/through')
 var vfile = require('vfile')
 
 // Expose a frozen processor.
@@ -229,7 +229,7 @@ function unified() {
       var entry = find(plugin)
 
       if (entry) {
-        if (plain(entry[1]) && plain(value)) {
+        if (isPlainObject(entry[1]) && isPlainObject(value)) {
           value = extend(entry[1], value)
         }
 
