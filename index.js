@@ -1,7 +1,7 @@
 'use strict'
 
 var bail = require('./src/utils/bail')
-var buffer = require('./src/utils/isBuffer')
+import isBuffer from './src/utils/isBuffer'
 var extend = require('./src/utils/extend')
 var isPlainObject = require('./src/utils/isPlainObject')
 var trough = require('./src/utils/through')
@@ -42,7 +42,7 @@ function pipelineStringify(p, ctx) {
 
   if (result === undefined || result === null) {
     // Empty.
-  } else if (typeof result === 'string' || buffer(result)) {
+  } else if (typeof result === 'string' || isBuffer(result)) {
     ctx.file.contents = result
   } else {
     ctx.file.result = result

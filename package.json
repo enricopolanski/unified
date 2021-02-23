@@ -36,6 +36,7 @@
     "Vse Mozhet Byt <vsemozhetbyt@gmail.com>",
     "Richard Littauer <richard.littauer@gmail.com>"
   ],
+  "type": "module",
   "types": "types/ts3.4/index.d.ts",
   "typesVersions": {
     ">=4.0": {
@@ -54,20 +55,23 @@
     "vfile": "^4.0.0"
   },
   "devDependencies": {
+    "@tsconfig/node12": "^1.0.7",
     "browserify": "^17.0.0",
     "c8": "^7.0.0",
     "dtslint": "^4.0.0",
+    "esmify": "^2.1.1",
     "prettier": "^2.0.0",
     "remark-cli": "^9.0.0",
     "remark-preset-wooorm": "^8.0.0",
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
+    "typescript": "^4.2.1-rc",
     "xo": "^0.37.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "build-bundle": "browserify index.js -s unified -o unified.js",
-    "build-mangle": "browserify index.js -s unified -p tinyify -o unified.min.js",
+    "build-bundle": "browserify index.js -s unified -o -p esmify > unified.js",
+    "build-mangle": "browserify index.js -s unified -p -p esmify > tinyify -o unified.min.js",
     "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node test",
     "test-coverage": "c8 --check-coverage --lines 10 --functions 10 --branches 10 --reporter lcov tape test",
