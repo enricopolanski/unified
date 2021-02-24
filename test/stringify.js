@@ -3,7 +3,7 @@
 var test = require('tape')
 var vfile = require('vfile')
 var noop = require('./util/noop')
-var unified = require('..')
+var unified = require('../dist')
 
 test('stringify(node[, file])', function (t) {
   var processor = unified()

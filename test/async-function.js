@@ -2,7 +2,7 @@
 
 var test = require('tape')
 var vfile = require('vfile')
-var unified = require('..')
+var unified = require('../dist')
 
 test('async function transformer () {}', function (t) {
   var givenFile = vfile('alpha')

@@ -1,7 +1,7 @@
 'use strict'
 
 var test = require('tape')
-var unified = require('..')
+var unified = require('../dist')
 
 test('parse(file)', function (t) {
   var processor = unified()

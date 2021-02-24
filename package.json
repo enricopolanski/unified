@@ -36,14 +36,6 @@
     "Vse Mozhet Byt <vsemozhetbyt@gmail.com>",
     "Richard Littauer <richard.littauer@gmail.com>"
   ],
-  "types": "types/ts3.4/index.d.ts",
-  "typesVersions": {
-    ">=4.0": {
-      "types/ts3.4/*": [
-        "types/ts4.0/*"
-      ]
-    }
-  },
   "files": [
     "types/ts3.4/index.d.ts",
     "types/ts4.0/index.d.ts",
@@ -51,6 +43,8 @@
     "lib"
   ],
   "dependencies": {
+    "@tsconfig/node12": "^1.0.7",
+    "typescript": "^4.2.1-rc",
     "vfile": "^4.0.0"
   },
   "devDependencies": {
@@ -65,6 +59,7 @@
     "xo": "^0.37.0"
   },
   "scripts": {
+    "compile": "tsc",
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
     "build-bundle": "browserify index.js -s unified -o unified.js",
     "build-mangle": "browserify index.js -s unified -p tinyify -o unified.min.js",

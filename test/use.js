@@ -1,7 +1,7 @@
 'use strict'
 
 var test = require('tape')
-var unified = require('..')
+var unified = require('../dist')
 
 test('use(plugin[, options])', function (t) {
   t.test('should ignore missing values', function (t) {

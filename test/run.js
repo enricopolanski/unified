@@ -2,7 +2,7 @@
 
 var test = require('tape')
 var vfile = require('vfile')
-var unified = require('..')
+var unified = require('../dist')
 
 test('run(node[, file], done)', function (t) {
   var givenFile = vfile('alpha')

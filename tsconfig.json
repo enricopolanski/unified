@@ -1,0 +1,27 @@
+{
+    "extends": "@tsconfig/node12/tsconfig.json",
+    "compilerOptions": {
+        "esModuleInterop": false,
+        "allowJs": true,
+        "allowUnreachableCode": false,
+        "allowSyntheticDefaultImports": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        "types": [
+            "node",
+        ],
+        "outDir": "dist"
+    },
+    "include": [
+        "src/**/*"
+    ]
+}

@@ -4,7 +4,7 @@ var test = require('tape')
 var vfile = require('vfile')
 var simple = require('./util/simple')
 var noop = require('./util/noop')
-var unified = require('..')
+var unified = require('../dist')
 
 test('process(file, done)', function (t) {
   var givenFile = vfile('alpha')

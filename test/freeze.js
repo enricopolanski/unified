@@ -2,7 +2,7 @@
 
 var test = require('tape')
 var simple = require('./util/simple')
-var unified = require('..')
+var unified = require('../dist/')
 
 test('freeze()', function (t) {
   var frozen = unified().use(config).freeze()

@@ -1,7 +1,7 @@
 'use strict'
 
 var test = require('tape')
-var unified = require('..')
+var unified = require('../dist')
 
 test('data(key[, value])', function (t) {
   var processor = unified()
