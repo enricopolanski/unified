@@ -10,7 +10,6 @@ var vfile = require('vfile')
 // Expose a frozen processor.
 module.exports = unified().freeze()
 
-var slice = [].slice
 var own = {}.hasOwnProperty
 
 // Process pipeline.
@@ -235,7 +234,7 @@ function unified() {
 
         entry[1] = value
       } else {
-        attachers.push(slice.call(arguments))
+        attachers.push(Array.from(arguments))
       }
     }
   }
