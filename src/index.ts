@@ -7,9 +7,6 @@ var isPlainObject = require('./utils/isPlainObject')
 var trough = require('./utils/through')
 var vfile = require('vfile')
 
-// Expose a frozen processor.
-module.exports = unified().freeze()
-
 var own = {}.hasOwnProperty
 
 // Process pipeline.
@@ -50,11 +47,11 @@ function pipelineStringify(p, ctx) {
 
 // Function to create the first processor.
 function unified() {
-  var attachers = []
+  var attachers: unknown[] = []
   var transformers = trough()
-  var namespace = {}
+  var namespace: Record<string, unknown> = {}
   var freezeIndex = -1
-  var frozen
+  var frozen: boolean = false;
 
   // Data management.
   processor.data = data
@@ -142,7 +139,7 @@ function unified() {
       }
 
       // Get `key`.
-      return (own.call(namespace, key) && namespace[key]) || null
+      return namespace.hasOwnProperty(key) ? namespace[key] : null
     }
 
     // Set space.
@@ -453,3 +450,6 @@ function assertDone(name, asyncName, complete) {
     )
   }
 }
+
+// Expose a frozen processor.
+module.exports = unified().freeze()
