@@ -1,52 +1,16 @@
-'use strict'
+import { isPlainObject } from './isPlainObject'
 
-var hasOwn = Object.prototype.hasOwnProperty
-var toString_ = Object.prototype.toString
-var defineProperty = Object.defineProperty
-var gOPD = Object.getOwnPropertyDescriptor
-
-var isArray = function isArray(array) {
-  if (typeof Array.isArray === 'function') {
-    return Array.isArray(array)
-  }
-
-  return toString_.call(array) === '[object Array]'
+function isArray(u: unknown) {
+    return Array.isArray(u)
 }
 
-var isPlainObject = require('./isPlainObject')
-
-// If name is '__proto__', and Object.defineProperty is available, define __proto__ as an own property on target
-var setProperty = function setProperty(target, options) {
-  if (defineProperty && options.name === '__proto__') {
-    defineProperty(target, options.name, {
-      enumerable: true,
-      configurable: true,
-      value: options.newValue,
-      writable: true
-    })
-  } else {
+function setProperty(target: Record<string, unknown>, options: {name: string, newValue: unknown}) {
     target[options.name] = options.newValue
-  }
 }
 
-// Return undefined instead of __proto__ if '__proto__' is not an own property
-var getProperty = function getProperty(object, name) {
-  if (name === '__proto__') {
-    if (!hasOwn.call(object, name)) {
-      return void 0
-    }
+const getProperty = (object: Record<string, unknown>, name: string) => object[name]
 
-    if (gOPD) {
-      // In early versions of node, obj['__proto__'] is buggy when obj has
-      // __proto__ as an own property. Object.getOwnPropertyDescriptor() works.
-      return gOPD(object, name).value
-    }
-  }
-
-  return object[name]
-}
-
-function extend () {
+export function extend () {
   var options
   var name
   var src
@@ -97,6 +61,8 @@ function extend () {
               clone = src && isPlainObject(src) ? src : {}
             }
 
+            console.log({deep, clone, copy})
+
             // Never move original objects, clone them
             setProperty(target, {
               name: name,
@@ -115,5 +81,3 @@ function extend () {
   // Return the modified object
   return target
 }
-
-module.exports = extend

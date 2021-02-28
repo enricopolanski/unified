@@ -1,16 +1,8 @@
-'use strict'
-
-const bail = require('./utils/bail')
-var buffer = require('./utils/isBuffer')
-var extend = require('./utils/extend')
-var isPlainObject = require('./utils/isPlainObject')
+import isBuffer from './utils/isBuffer'
+import { isPlainObject } from './utils/isPlainObject'
+import { extend } from './utils/extend'
 var trough = require('./utils/through')
 var vfile = require('vfile')
-
-// Expose a frozen processor.
-module.exports = unified().freeze()
-
-var own = {}.hasOwnProperty
 
 // Process pipeline.
 var pipeline = trough()
@@ -41,7 +33,7 @@ function pipelineStringify(p, ctx) {
 
   if (result === undefined || result === null) {
     // Empty.
-  } else if (typeof result === 'string' || buffer(result)) {
+  } else if (typeof result === 'string' || isBuffer(result)) {
     ctx.file.contents = result
   } else {
     ctx.file.result = result
@@ -50,11 +42,11 @@ function pipelineStringify(p, ctx) {
 
 // Function to create the first processor.
 function unified() {
-  var attachers = []
+  var attachers: unknown[] = []
   var transformers = trough()
-  var namespace = {}
+  var namespace: Record<string, unknown> = {}
   var freezeIndex = -1
-  var frozen
+  var frozen: boolean = false;
 
   // Data management.
   processor.data = data
@@ -142,7 +134,7 @@ function unified() {
       }
 
       // Get `key`.
-      return (own.call(namespace, key) && namespace[key]) || null
+      return namespace.hasOwnProperty(key) ? namespace[key] : null
     }
 
     // Set space.
@@ -312,9 +304,11 @@ function unified() {
     return result
 
     function done(error, tree) {
+      if (error) {
+        throw error
+      }
       complete = true
       result = tree
-      bail(error)
     }
   }
 
@@ -386,7 +380,9 @@ function unified() {
 
     function done(error) {
       complete = true
-      bail(error)
+      if (error) {
+        throw error
+      }
     }
   }
 }
@@ -453,3 +449,6 @@ function assertDone(name, asyncName, complete) {
     )
   }
 }
+
+// Expose a frozen processor.
+module.exports = unified().freeze()

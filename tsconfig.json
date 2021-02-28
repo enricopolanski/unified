@@ -1,7 +1,7 @@
 {
     "extends": "@tsconfig/node12/tsconfig.json",
     "compilerOptions": {
-        "esModuleInterop": false,
+        "esModuleInterop": true,
         "allowJs": true,
         "allowUnreachableCode": false,
         "allowSyntheticDefaultImports": true,
@@ -16,6 +16,7 @@
         "strictBindCallApply": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
+        "moduleResolution": "node",
         "types": [
             "node",
         ],

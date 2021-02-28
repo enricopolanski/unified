@@ -1,19 +1,13 @@
-'use strict'
-
-var slice = [].slice
-
-module.exports = wrap
-
 // Wrap `fn`.
 // Can be sync or async; return a promise, receive a completion handler, return
 // new values and errors.
-function wrap(fn, callback) {
-  var invoked
+export default function wrap(fn: Function, callback: Function) {
+  let invoked: boolean = false
 
   return wrapped
 
   function wrapped() {
-    var params = slice.call(arguments, 0)
+    var params = Array.from(arguments)
     var callback = fn.length > params.length
     var result
 
@@ -22,7 +16,7 @@ function wrap(fn, callback) {
     }
 
     try {
-      result = fn.apply(null, params)
+      result = fn(...params)
     } catch (error) {
       // Well, this is quite the pickle.
       // `fn` received a callback and invoked it (thus continuing the pipeline),
@@ -48,17 +42,17 @@ function wrap(fn, callback) {
   }
 
   // Invoke `next`, only once.
-  function done() {
+  function done(...args: unknown[]) {
     if (!invoked) {
       invoked = true
 
-      callback.apply(null, arguments)
+      callback.apply(null, args)
     }
   }
 
   // Invoke `done` with one value.
   // Tracks if an error is passed, too.
-  function then(value) {
+  function then(value: null) {
     done(null, value)
   }
 }
