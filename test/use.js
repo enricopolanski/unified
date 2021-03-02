@@ -305,7 +305,8 @@ test('use(preset)', function (t) {
   })
 
   t.test('should support presets with empty settings', function (t) {
-    var processor = unified().use({settings: {}}).freeze()
+    const processor = unified().use({settings: {}}).freeze()
+    console.log(unified().data())
     t.deepEqual(processor.data(), {settings: {}})
     t.end()
   })

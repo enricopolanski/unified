@@ -1,6 +1,5 @@
 import isBuffer from './utils/isBuffer'
 import { isPlainObject } from './utils/isPlainObject'
-import { extend } from './utils/extend'
 import { trough } from './utils/through'
 import vfile from 'vfile'
 
@@ -78,7 +77,7 @@ function unified() {
       destination.use.apply(null, attachers[index])
     }
 
-    destination.data(extend(true, {}, namespace))
+    destination.data({...namespace})
 
     return destination
   }
@@ -175,7 +174,7 @@ function unified() {
     }
 
     if (settings) {
-      namespace.settings = extend(namespace.settings || {}, settings)
+      namespace.settings = {...namespace.settings, ...settings}
     }
 
     return processor
@@ -184,7 +183,7 @@ function unified() {
       addList(result.plugins)
 
       if (result.settings) {
-        settings = extend(settings || {}, result.settings)
+        settings = {...settings, ...result.settings}
       }
     }
 
@@ -221,7 +220,7 @@ function unified() {
 
       if (entry) {
         if (isPlainObject(entry[1]) && isPlainObject(value)) {
-          value = extend(entry[1], value)
+          value = {...entry[1], ...value}
         }
 
         entry[1] = value
