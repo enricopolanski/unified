@@ -3,6 +3,12 @@ import isPlainObject from './utils/isPlainObject'
 import trough from './utils/through'
 import vfile from 'vfile'
 
+interface Parser {
+  (): {
+    value?: string
+    parse: () => { type: string, value: ReturnType<Parser>['value']} }
+}
+
 // Process pipeline.
 var pipeline = trough()
   .use(pipelineParse)
