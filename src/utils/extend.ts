@@ -61,8 +61,6 @@ export function extend () {
               clone = src && isPlainObject(src) ? src : {}
             }
 
-            console.log({deep, clone, copy})
-
             // Never move original objects, clone them
             setProperty(target, {
               name: name,

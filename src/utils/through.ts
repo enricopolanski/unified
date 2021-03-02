@@ -1,13 +1,7 @@
 import wrap from './wrap'
 
-module.exports = trough
-
-trough.wrap = wrap
-
-var slice = [].slice
-
 // Create new middleware.
-function trough() {
+export function trough() {
   var fns: Function[] = []
   var middleware = {
     run,
@@ -18,7 +12,7 @@ function trough() {
   function run(...args: unknown[]) {
     let index = -1
     // all but last arguments
-    let input: unknown[] = slice.call(args, 0, -1)
+    let input: unknown[] = [].slice.call(args, 0, -1)
     // last
     var done: Function = args[args.length - 1] as Function
     
