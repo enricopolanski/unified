@@ -1,6 +1,6 @@
 import isBuffer from './utils/isBuffer'
-import { isPlainObject } from './utils/isPlainObject'
-import { trough } from './utils/through'
+import isPlainObject from './utils/isPlainObject'
+import trough from './utils/through'
 import vfile from 'vfile'
 
 // Process pipeline.

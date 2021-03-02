@@ -1,7 +1,7 @@
 import wrap from './wrap'
 
 // Create new middleware.
-export function trough() {
+export default function through() {
   var fns: Function[] = []
   var middleware = {
     run,
