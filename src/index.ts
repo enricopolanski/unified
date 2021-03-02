@@ -1,13 +1,7 @@
 import isBuffer from './utils/isBuffer'
 import isPlainObject from './utils/isPlainObject'
 import trough from './utils/through'
-import vfile from 'vfile'
-
-interface Parser {
-  (): {
-    value?: string
-    parse: () => { type: string, value: ReturnType<Parser>['value']} }
-}
+import vfile, { VFile } from 'vfile'
 
 // Process pipeline.
 var pipeline = trough()
@@ -15,7 +9,7 @@ var pipeline = trough()
   .use(pipelineRun)
   .use(pipelineStringify)
 
-function pipelineParse(p, ctx) {
+function pipelineParse(p: ReturnType<Parser>, ctx : {file: string | VFile, tree: unknown}) {
   ctx.tree = p.parse(ctx.file)
 }
 
@@ -248,17 +242,16 @@ function unified() {
 
   // Parse a file (in string or vfile representation) into a unist node using
   // the `Parser` on the processor.
-  function parse(doc) {
+  function parse(doc: string | VFile) {
     var file = vfile(doc)
-    var Parser
+    const Parser = (processor as any as { Parser: Parser}).Parser
 
     freeze()
-    Parser = processor.Parser
     assertParser('parse', Parser)
 
-    if (newable(Parser, 'parse')) {
-      return new Parser(String(file), file).parse()
-    }
+    // if (newable(Parser, 'parse')) {
+    //   return new Parser(String(file), file).parse()
+    // }
 
     return Parser(String(file), file) // eslint-disable-line new-cap
   }
@@ -415,7 +408,7 @@ function keys(value) {
 }
 
 // Assert a parser is available.
-function assertParser(name, Parser) {
+function assertParser(name: string, Parser: unknown) {
   if (typeof Parser !== 'function') {
     throw new Error('Cannot `' + name + '` without `Parser`')
   }
