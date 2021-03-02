@@ -127,3 +127,5 @@ Same as above.
 ### Final changes summary
 
 Removed the `extend` plugin completely.
+
+Completed in commit: 2d9c5d84216b69380fd197e7239ed1b3cee6a988.
