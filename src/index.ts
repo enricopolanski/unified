@@ -1,7 +1,19 @@
 import isBuffer from './utils/isBuffer'
 import isPlainObject from './utils/isPlainObject'
 import trough from './utils/through'
-import vfile, { VFile } from 'vfile'
+import vfile, {VFile} from 'vfile'
+
+interface ParserInterface {
+  parse: () => unknown
+}
+
+interface ParserConstructor {
+  new (doc: string, file: {message: unknown}): ParserInterface
+}
+
+interface ParserFunction {
+  (doc: string, file: {message: unknown}): unknown
+}
 
 // Process pipeline.
 var pipeline = trough()
@@ -9,7 +21,7 @@ var pipeline = trough()
   .use(pipelineRun)
   .use(pipelineStringify)
 
-function pipelineParse(p: ReturnType<Parser>, ctx : {file: string | VFile, tree: unknown}) {
+function pipelineParse(p: unknown, ctx: {file: string | VFile; tree: unknown}) {
   ctx.tree = p.parse(ctx.file)
 }
 
@@ -45,7 +57,7 @@ function unified() {
   var transformers = trough()
   var namespace: Record<string, unknown> = {}
   var freezeIndex = -1
-  var frozen: boolean = false;
+  var frozen: boolean = false
 
   // Data management.
   processor.data = data
@@ -240,18 +252,21 @@ function unified() {
     }
   }
 
+  type ProcessorWithParser = {
+    Parser: ParserConstructor | ParserFunction
+  }
   // Parse a file (in string or vfile representation) into a unist node using
   // the `Parser` on the processor.
   function parse(doc: string | VFile) {
     var file = vfile(doc)
-    const Parser = (processor as any as { Parser: Parser}).Parser
+    const Parser = ((processor as unknown) as ProcessorWithParser).Parser
 
     freeze()
     assertParser('parse', Parser)
 
-    // if (newable(Parser, 'parse')) {
-    //   return new Parser(String(file), file).parse()
-    // }
+    if (isParserConstructor(Parser, 'parse')) {
+      return new Parser(String(file), file).parse()
+    }
 
     return Parser(String(file), file) // eslint-disable-line new-cap
   }
@@ -385,20 +400,27 @@ function unified() {
   }
 }
 
+function isParserConstructor(
+  value: ParserFunction | ParserConstructor,
+  name: string
+): value is ParserConstructor {
+  return newable(value, name)
+}
+
 // Check if `value` is a constructor.
-function newable(value, name) {
+function newable(value: Function, name: string) {
   return (
     typeof value === 'function' &&
     value.prototype &&
     // A function with keys in its prototype is probably a constructor.
     // Classes’ prototype methods are not enumerable, so we check if some value
     // exists in the prototype.
-    (keys(value.prototype) || name in value.prototype)
+    (hasKeys(value.prototype) || name in value.prototype)
   )
 }
 
 // Check if `value` is an object with keys.
-function keys(value) {
+function hasKeys(value: Record<string, unknown>): boolean {
   var key
   for (key in value) {
     return true

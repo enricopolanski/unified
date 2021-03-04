@@ -108,4 +108,19 @@ Takeaways:
 
 ### Type the Parser
 
-TODO: TBS
+TODO: WIP
+
+```ts
+interface ParserInterface {
+  parse: ()=> unknown
+}
+
+
+interface ParserConstructor {
+  new (doc: string, file: { message: unknown}): ParserInterface
+}
+
+interface ParserFunction {
+  (doc: string, file: { message: unknown}) => unknown
+}
+```
