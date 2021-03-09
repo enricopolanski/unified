@@ -60,7 +60,7 @@ test('stringify(node[, file])', function (t) {
     'should return the result `compiler` returns if it’s an arrow function'
   )
 
-  processor.Compiler = noop.Compiler
+  processor.Compiler = function () {}
 
   t.throws(
     function () {

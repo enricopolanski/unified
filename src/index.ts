@@ -15,14 +15,40 @@ interface ParserFunction {
   (doc: string, file: {message: unknown}): unknown
 }
 
+interface Node {
+  type: string
+}
+
+interface CompilerFunction {
+  (node: {type: string}, file: string | VFile): string
+}
+
+interface CompilerInterface {
+  compile: () => string
+}
+
+interface CompilerConstructor {
+  new (node: {type: string}, file: string | VFile): CompilerInterface
+}
+
+interface Processor {
+  Parser: ParserConstructor | ParserFunction
+  parse(doc: string | VFile): unknown
+  Compiler: CompilerFunction | CompilerConstructor
+  stringify(node: Node, doc: string | VFile): string
+}
+
 // Process pipeline.
 var pipeline = trough()
   .use(pipelineParse)
   .use(pipelineRun)
   .use(pipelineStringify)
 
-function pipelineParse(p: unknown, ctx: {file: string | VFile; tree: unknown}) {
-  ctx.tree = p.parse(ctx.file)
+function pipelineParse(
+  processor: Processor,
+  ctx: {file: string | VFile; tree: unknown}
+) {
+  ctx.tree = processor.parse(ctx.file)
 }
 
 function pipelineRun(p, ctx, next) {
@@ -39,7 +65,7 @@ function pipelineRun(p, ctx, next) {
   }
 }
 
-function pipelineStringify(p, ctx) {
+function pipelineStringify(p: Processor, ctx) {
   var result = p.stringify(ctx.tree, ctx.file)
 
   if (result === undefined || result === null) {
@@ -252,17 +278,14 @@ function unified() {
     }
   }
 
-  type ProcessorWithParser = {
-    Parser: ParserConstructor | ParserFunction
-  }
   // Parse a file (in string or vfile representation) into a unist node using
   // the `Parser` on the processor.
   function parse(doc: string | VFile) {
     var file = vfile(doc)
-    const Parser = ((processor as unknown) as ProcessorWithParser).Parser
+    const Parser = ((processor as unknown) as Processor).Parser
 
     freeze()
-    assertParser('parse', Parser)
+    assertDesiredFunction('parse', Parser, 'Parser')
 
     if (isParserConstructor(Parser, 'parse')) {
       return new Parser(String(file), file).parse()
@@ -327,16 +350,16 @@ function unified() {
 
   // Stringify a unist node representation of a file (in string or vfile
   // representation) into a string using the `Compiler` on the processor.
-  function stringify(node, doc) {
+  function stringify(node: Node, doc: string | VFile) {
     var file = vfile(doc)
-    var Compiler
+    var Compiler = ((processor as unknown) as Processor).Compiler
 
     freeze()
-    Compiler = processor.Compiler
-    assertCompiler('stringify', Compiler)
+
+    assertDesiredFunction('stringify', Compiler, 'Compiler')
     assertNode(node)
 
-    if (newable(Compiler, 'compile')) {
+    if (isCompilerConstructor(Compiler, 'compile')) {
       return new Compiler(node, file).compile()
     }
 
@@ -349,8 +372,8 @@ function unified() {
   // store that result on the vfile.
   function process(doc, cb) {
     freeze()
-    assertParser('process', processor.Parser)
-    assertCompiler('process', processor.Compiler)
+    assertDesiredFunction('process', processor.Parser, 'Parser')
+    assertDesiredFunction('process', processor.Compiler, 'Compiler')
 
     if (!cb) {
       return new Promise(executor)
@@ -381,8 +404,8 @@ function unified() {
     var complete
 
     freeze()
-    assertParser('processSync', processor.Parser)
-    assertCompiler('processSync', processor.Compiler)
+    assertDesiredFunction('processSync', processor.Parser, 'Parser')
+    assertDesiredFunction('processSync', processor.Compiler, 'Compiler')
     file = vfile(doc)
 
     process(file, done)
@@ -404,6 +427,13 @@ function isParserConstructor(
   value: ParserFunction | ParserConstructor,
   name: string
 ): value is ParserConstructor {
+  return newable(value, name)
+}
+
+function isCompilerConstructor(
+  value: CompilerConstructor | CompilerFunction,
+  name: string
+): value is CompilerConstructor {
   return newable(value, name)
 }
 
@@ -430,21 +460,18 @@ function hasKeys(value: Record<string, unknown>): boolean {
 }
 
 // Assert a parser is available.
-function assertParser(name: string, Parser: unknown) {
-  if (typeof Parser !== 'function') {
-    throw new Error('Cannot `' + name + '` without `Parser`')
-  }
-}
-
-// Assert a compiler is available.
-function assertCompiler(name, Compiler) {
-  if (typeof Compiler !== 'function') {
-    throw new Error('Cannot `' + name + '` without `Compiler`')
+function assertDesiredFunction(
+  name: string,
+  maybeFunction: unknown,
+  desiredFunction: string
+) {
+  if (typeof maybeFunction !== 'function') {
+    throw new Error('Cannot `' + name + '` without `' + desiredFunction + '`')
   }
 }
 
 // Assert the processor is not frozen.
-function assertUnfrozen(name, frozen) {
+function assertUnfrozen(name: string, frozen: boolean) {
   if (frozen) {
     throw new Error(
       'Cannot invoke `' +
@@ -454,8 +481,12 @@ function assertUnfrozen(name, frozen) {
   }
 }
 
+interface Node {
+  type: string
+}
+
 // Assert `node` is a unist node.
-function assertNode(node) {
+function assertNode(node?: Node) {
   if (!node || typeof node.type !== 'string') {
     throw new Error('Expected node, got `' + node + '`')
   }

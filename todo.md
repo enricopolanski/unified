@@ -9,3 +9,5 @@ if (newable(Parser, 'parse')) {
 ```
 
 Check if this can be rewritten.
+
+## Look into overloads for functions like `data` in processor.
