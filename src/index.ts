@@ -20,7 +20,7 @@ interface Node {
 }
 
 interface CompilerFunction {
-  (node: {type: string}, file: string | VFile): string
+  (node: Node, file: string | VFile): string
 }
 
 interface CompilerInterface {
@@ -28,7 +28,7 @@ interface CompilerInterface {
 }
 
 interface CompilerConstructor {
-  new (node: {type: string}, file: string | VFile): CompilerInterface
+  new (node: Node, file: string | VFile): CompilerInterface
 }
 
 interface Processor {
@@ -36,6 +36,11 @@ interface Processor {
   parse(doc: string | VFile): unknown
   Compiler: CompilerFunction | CompilerConstructor
   stringify(node: Node, doc: string | VFile): string
+  run(
+    node: Node,
+    file: string | VFile | Function,
+    cb?: Function
+  ): unknown | void
 }
 
 // Process pipeline.
@@ -51,10 +56,14 @@ function pipelineParse(
   ctx.tree = processor.parse(ctx.file)
 }
 
-function pipelineRun(p, ctx, next) {
+function pipelineRun(
+  p: Processor,
+  ctx: {file: string | VFile; tree: Node},
+  next: (error?: unknown) => void
+) {
   p.run(ctx.tree, ctx.file, done)
 
-  function done(error, tree, file) {
+  function done(error: unknown, tree: Node, file: string | VFile) {
     if (error) {
       next(error)
     } else {
@@ -65,7 +74,10 @@ function pipelineRun(p, ctx, next) {
   }
 }
 
-function pipelineStringify(p: Processor, ctx) {
+function pipelineStringify(
+  p: Processor,
+  ctx: {file: string | VFile; tree: Node}
+) {
   var result = p.stringify(ctx.tree, ctx.file)
 
   if (result === undefined || result === null) {
@@ -225,7 +237,7 @@ function unified() {
       }
     }
 
-    function add(value) {
+    function add(value: unknown) {
       if (typeof value === 'function') {
         addPlugin(value)
       } else if (typeof value === 'object') {
@@ -296,25 +308,23 @@ function unified() {
 
   // Run transforms on a unist node representation of a file (in string or
   // vfile representation), async.
-  function run(node, file, cb) {
+  function run(node: Node, file: string | VFile | Function, cb?: Function) {
     assertNode(node)
     freeze()
 
     if (!cb && typeof file === 'function') {
       cb = file
-      file = null
+      // file = null TODO: Leave here, doesn't break results commented but still
     }
 
     if (!cb) {
       return new Promise(executor)
     }
 
-    executor(null, cb)
-
-    function executor(resolve, reject) {
+    function executor(resolve: Function | null, reject: Function) {
       transformers.run(node, vfile(file), done)
 
-      function done(error, tree, file) {
+      function done(error: unknown, tree: Node, file: string | VFile) {
         tree = tree || node
         if (error) {
           reject(error)
@@ -325,13 +335,15 @@ function unified() {
         }
       }
     }
+
+    executor(null, cb)
   }
 
   // Run transforms on a unist node representation of a file (in string or
   // vfile representation), sync.
-  function runSync(node, file) {
-    var result
-    var complete
+  function runSync(node: Node, file: string | VFile): Node {
+    let result: Node = {type: 'DEBUG'}
+    let complete = false
 
     run(node, file, done)
 
@@ -339,7 +351,8 @@ function unified() {
 
     return result
 
-    function done(error, tree) {
+    // TODO: Possible tree: Node?
+    function done(error: unknown, tree: Node) {
       if (error) {
         throw error
       }
@@ -370,10 +383,18 @@ function unified() {
   // the `Parser` on the processor, then run transforms on that node, and
   // compile the resulting node using the `Compiler` on the processor, and
   // store that result on the vfile.
-  function process(doc, cb) {
+  function process(doc: string | VFile, cb: Function) {
     freeze()
-    assertDesiredFunction('process', processor.Parser, 'Parser')
-    assertDesiredFunction('process', processor.Compiler, 'Compiler')
+    assertDesiredFunction(
+      'process',
+      ((processor as unknown) as Processor).Parser,
+      'Parser'
+    )
+    assertDesiredFunction(
+      'process',
+      ((processor as unknown) as Processor).Compiler,
+      'Compiler'
+    )
 
     if (!cb) {
       return new Promise(executor)
@@ -381,12 +402,12 @@ function unified() {
 
     executor(null, cb)
 
-    function executor(resolve, reject) {
+    function executor(resolve: Function | null, reject: Function) {
       var file = vfile(doc)
 
       pipeline.run(processor, {file: file}, done)
 
-      function done(error) {
+      function done(error: unknown) {
         if (error) {
           reject(error)
         } else if (resolve) {
@@ -399,14 +420,21 @@ function unified() {
   }
 
   // Process the given document (in string or vfile representation), sync.
-  function processSync(doc) {
-    var file
-    var complete
+  function processSync(doc: string | VFile) {
+    const file = vfile(doc)
+    let complete = false
 
     freeze()
-    assertDesiredFunction('processSync', processor.Parser, 'Parser')
-    assertDesiredFunction('processSync', processor.Compiler, 'Compiler')
-    file = vfile(doc)
+    assertDesiredFunction(
+      'processSync',
+      ((processor as unknown) as Processor).Parser,
+      'Parser'
+    )
+    assertDesiredFunction(
+      'processSync',
+      ((processor as unknown) as Processor).Compiler,
+      'Compiler'
+    )
 
     process(file, done)
 
@@ -414,7 +442,7 @@ function unified() {
 
     return file
 
-    function done(error) {
+    function done(error?: unknown) {
       complete = true
       if (error) {
         throw error
@@ -481,10 +509,6 @@ function assertUnfrozen(name: string, frozen: boolean) {
   }
 }
 
-interface Node {
-  type: string
-}
-
 // Assert `node` is a unist node.
 function assertNode(node?: Node) {
   if (!node || typeof node.type !== 'string') {
@@ -493,7 +517,7 @@ function assertNode(node?: Node) {
 }
 
 // Assert that `complete` is `true`.
-function assertDone(name, asyncName, complete) {
+function assertDone(name: string, asyncName: string, complete: boolean) {
   if (!complete) {
     throw new Error(
       '`' + name + '` finished async. Use `' + asyncName + '` instead'
